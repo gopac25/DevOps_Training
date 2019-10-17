@@ -1,0 +1,132 @@
+Dockerfile
+Enjoy this cheat sheet at its fullest within Dash, the macOS documentation browser.
+Reference - Best Practices
+
+Instructions
+FROM
+
+The FROM instruction initializes a new build stage and sets the Base Image for subsequent instructions. As such, a valid Dockerfile must start with a FROM instruction. The image can be any valid image – it is especially easy to start by pulling an image from the Public Repositories.
+
+Usage:
+FROM <image>
+FROM <image>:<tag>
+
+MAINTAINER
+
+The MAINTAINER instruction sets the Author field of the generated images. 
+
+Usage:
+MAINTAINER <name>
+
+RUN
+
+The RUN instruction will execute any commands in a new layer on top of the current image and commit the results. The all commands which we mention run during image build.
+
+Usage:
+RUN <command>
+RUN ["<executable>", "<param1>", "<param2>"] (exec form)
+
+CMD
+
+CMD instruction allows you to set a default command, which will be executed only when you run container without specifying a command. If Docker container runs with a command, the default command will be ignored. If Dockerfile has more than one CMD instruction, all but last CMD instructions are ignored.
+
+Usage:
+CMD ["<executable>","<param1>","<param2>"] (exec form, this is the preferred form)
+CMD ["<param1>","<param2>"] (as default parameters to ENTRYPOINT)
+CMD <command> <param1> <param2> (shell form)
+
+LABEL
+
+Usage:
+LABEL <key>=<value> [<key>=<value> ...]
+
+EXPOSE
+
+Usage:
+EXPOSE <port> [<port> ...]
+
+ENV
+
+Usage:
+ENV <key> <value>
+ENV <key>=<value> [<key>=<value> ...]
+
+ADD
+
+Usage:
+ADD <src> [<src> ...] <dest>
+ADD ["<src>", ... "<dest>"] (this form is required for paths containing whitespace)
+
+COPY
+
+Usage:
+COPY <src> [<src> ...] <dest>
+COPY ["<src>", ... "<dest>"] 
+
+ENTRYPOINT
+
+Usage:
+ENTRYPOINT ["<executable>", "<param1>", "<param2>"] (exec form, preferred)
+ENTRYPOINT <command> <param1> <param2> (shell form)
+
+VOLUME
+
+Usage:
+VOLUME ["<path>", ...]
+VOLUME <path> [<path> ...]
+
+USER
+
+Usage:
+USER <username | UID>
+
+WORKDIR
+
+Usage:
+WORKDIR </path/to/workdir>
+
+ARG
+
+Usage:
+ARG <name>[=<default value>]
+
+
+SHELL
+
+Usage:
+SHELL ["<executable>", "<param1>", "<param2>"]
+
+
+
+
+The ENTRYPOINT specifies a command that will always be executed when the container starts.
+
+The CMD specifies arguments that will be fed to the ENTRYPOINT.
+
+
+
+
+The documentation states for CMD
+
+The main purpose of a CMD is to provide defaults for an executing container.
+
+and for ENTRYPOINT:
+
+An ENTRYPOINT helps you to configure a container that you can run as an executable.
+
+
+
+
+From node:latest
+
+MAINTAINER gopac25@gmail.com
+
+WORKDIR /project/first/web
+
+RUN git clone https://github.com/gopac25/webapp-demo.git /project/first/web/
+
+RUN npm install -g lite-server
+
+EXPOSE 3000
+
+CMD lite-server
