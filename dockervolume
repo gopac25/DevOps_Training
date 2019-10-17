@@ -1,0 +1,120 @@
+The docker volume create command allows you to create a volume without relating it to any particular container. We’ll use this command to add a volume named DataVolume1:
+
+Step 1 — Creating an Independent Volume
+# docker volume create --name DataVolume1
+
+To make use of the volume, we’ll create a new container from the Ubuntu image, using the --rm flag to automatically delete it when we exit. We’ll also use -v to mount the new volume. 
+
+# docker run -ti --rm -v DataVolume1:/datavolume1 ubuntu
+
+While in the container, let’s write some data to the volume:
+
+# echo "Example1" > /datavolume1/Example1.txt
+
+Because we used the --rm flag, our container will be automatically deleted when we exit. Our volume, however, will still be accessible.
+
+# exit
+
+We can verify that the volume is present on our system with docker volume inspect:
+
+# docker volume inspect DataVolume1
+
+Next, let’s start a new container and attach DataVolume1:
+
+# docker run --rm -ti -v DataVolume1:/datavolume1 ubuntu
+
+Verify the contents:
+
+# cat /datavolume1/Example1.txt
+
+Output
+Example1
+
+Exit the container:
+
+#exit
+
+
+
+
+Step 4 — Sharing Data Between Multiple Docker Containers
+
+Create Container4 and DataVolume4:
+
+Use docker run to create a new container named Container4 with a data volume attached:
+
+# docker run -ti --name=Container4 -v DataVolume4:/datavolume4 ubuntu
+
+Next we’ll create a file and add some text:
+
+# echo "This file is shared between containers" > /datavolume4/Example4.txt
+
+Then, we’ll exit the container:
+
+# exit
+
+This returns us to the host command prompt, where we’ll make a new container that mounts the data volume from Container4.
+
+Create Container5 and Mount Volumes from Container4:
+
+We’re going to create Container5, and mount the volumes from Container4:
+
+# docker run -ti --name=Container5 --volumes-from Container4 ubuntu
+
+Let’s check the data persistence:
+
+# cat /datavolume4/Example4.txt
+Output
+
+This file is shared between containers
+
+Now let’s append some text from Container5:
+
+echo "Both containers can write to DataVolume4" >> /datavolume4/Example4.txt
+
+Finally, we’ll exit the container:
+
+# exit
+
+Next, we’ll check that our data is still present to Container4.
+
+View Changes Made in Container5
+Let’s check for the changes that were written to the data volume by Container5 by restarting Container4:
+
+# docker start -ai Container4
+
+Check for the changes:
+
+cat /datavolume4/Example4.txt
+Output
+This file is shared between containers
+Both containers can write to DataVolume4
+
+Now that we’ve verified that both containers were able to read and write from the data volume, we’ll exit the container:
+
+# exit
+
+Again, Docker doesn’t handle any file locking, so applications must account for the file locking themselves. It is possible to mount a Docker volume as read-only to ensure that data corruption won’t happen by accident when a container requires read-only access by adding :ro. Let’s look at how this works.
+
+Start Container 6 and Mount the Volume Read-Only:
+
+Once a volume has been mounted in a container, rather than unmounting it like we would with a typical Linux file system, we can instead create a new container mounted the way we want and, if needed, remove the previous container. To make the volume read-only, we append :ro to the end of the container name:
+
+# docker run -ti --name=Container6 --volumes-from Container4:ro ubuntu
+
+We’ll check the read-only status by trying to remove our example file:
+
+# rm /datavolume4/Example4.txt
+
+Output
+rm: cannot remove '/datavolume4/Example4.txt': Read-only file system
+
+Finally, we’ll exit the container and clean up our test containers and volumes:
+
+# exit
+
+Now that we’re done, let’s clean up our containers and volume:
+
+# docker rm Container4 Container5 Container6
+# docker volume rm DataVolume4
+
